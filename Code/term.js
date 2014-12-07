@@ -31,6 +31,7 @@ const SCALE_MIN = 2.7;
 const SCALE_MAX = 3.3;
 const rotation_speed = 1;
 
+// surface constants
 const TOP = 0;
 const BOTTOM = 1;
 const LEFT = 2;
@@ -139,6 +140,19 @@ var paintColors = [
 
 var cube_matrices = [];
 
+// Animation constants and variables
+const ANIM_NO_ANIM = -1;
+const ANIM_SURFACE = 0;
+const ANIM_ROTATE = 1;
+var anim_surface;
+var anim_surface_clockwise;
+var anim_rotate_axis;
+var anim = ANIM_NO_ANIM;
+
+const ANIM_SURFACE_TIME = 10;
+var time_surface = ANIM_SURFACE_TIME;
+var omega_rotate = 10;
+
 window.onload = function init(){
 
   //  Setup WebGL
@@ -242,45 +256,49 @@ function update_cube_positions(surface, clockwise) {
   cube_positions[m[e[3]]] = temp;
 }
 
-// keyboard event
+/*--------------keyboard event------------------*/
 window.addEventListener("keydown", function() {
+
+  if (anim != ANIM_NO_ANIM) return;
 
   var toColor;
   var displacement_x = 0;
   var displacement_z = 0;
-  var surface = 6;
-  var clockwise = 0;
+  anim_surface = 6;
+  anim_surface_clockwise = 0;
+  anim = ANIM_NO_ANIM;
   /*
     Press
       't' to rotate top
   */
+  // switch for surface of rotation
   switch (event.keyCode) {
     case 81:
     case 65:
-      surface = TOP;
+      anim_surface = TOP;
     break;
     case 87:
     case 83:
-      surface = BOTTOM;
+      anim_surface = BOTTOM;
     break;
     case 69:
     case 68:
-      surface = LEFT;
+      anim_surface = LEFT;
     break;
     case 82:
     case 70:
-      surface = RIGHT;
+      anim_surface = RIGHT;
     break;
     case 84:
     case 71:
-      surface = FRONT;
+      anim_surface = FRONT;
     break;
     case 89:
     case 72:
-      surface = BACK;
+      anim_surface = BACK;
     break;
   }
-
+  // switch for surface rotation clockwise
   switch (event.keyCode) {
     case 81:
     case 87:
@@ -288,7 +306,7 @@ window.addEventListener("keydown", function() {
     case 82:
     case 84:
     case 89:
-      clockwise = 1;
+      anim_surface_clockwise = 1;
     break;
     case 65:
     case 83:
@@ -296,11 +314,26 @@ window.addEventListener("keydown", function() {
     case 70:
     case 71:
     case 72:
-      clockwise = -1;
+      anim_surface_clockwise = -1;
     break;
   }
 
+  // switch for rotation axis
   switch (event.keyCode) {
+  	case 90:
+  	  anim_rotate_axis = [0, 0, 1];
+  	  break;
+  	case 88:
+  	  anim_rotate_axis = [1, 0, 0];
+  	  break;
+  	case 67:
+  	  anim_rotate_axis = [0, 1, 0];
+  	  break;
+  }
+
+  // switch for type of action
+  switch (event.keyCode) {
+  	// reset
     case 80:
       for (var i = 0; i < NumCubes; i++) {
         cube_positions[i] = i;
@@ -308,26 +341,28 @@ window.addEventListener("keydown", function() {
       }
       viewMatrix = initial_position;
     break;
-    // rotate magic cube along z axis
+    // rotate surface
+    case 81:
+    case 87:
+    case 69:
+    case 82:
+    case 84:
+    case 89:
+    case 65:
+    case 83:
+    case 68:
+    case 70:
+    case 71:
+    case 72:
+      time_surface = 0;
+      anim = ANIM_SURFACE;
+    break;
+    // rotate cube
     case 90:
-      viewMatrix = mult(viewMatrix, rotate(90, [0, 0, 1]));
-    break;
-    // rotate magic cube along x axis
     case 88:
-      viewMatrix = mult(viewMatrix, rotate(90, [1, 0, 0]));
-    break;
-    // rotate magic cube along y axis
     case 67:
-      viewMatrix = mult(viewMatrix, rotate(90, [0, 1, 0]));
+      anim = ANIM_ROTATE;
     break;
-  }
-
-  if (clockwise != 0) {
-    for (var i = 0; i < 9; i++) {
-      var myPosition = cube_positions[rotation_rubiks[surface][i]];
-      cube_matrices[myPosition] = mult(rotate(clockwise * 90, axes[surface]), cube_matrices[myPosition]);
-    }
-    update_cube_positions(surface, clockwise > 0 ? 0 : 1);
   }
 });
 
@@ -351,6 +386,24 @@ function render() {
   if (scale_factor <= SCALE_MIN || scale_factor >= SCALE_MAX) scale_speed = -scale_speed;
 
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  switch (anim) {
+  	case ANIM_ROTATE:
+  	  viewMatrix = mult(viewMatrix, rotate(omega_rotate, anim_rotate_axis));
+  	  anim = ANIM_NO_ANIM;
+  	  break;
+  	case ANIM_SURFACE:
+  	  time_surface++;
+ 	  for (var i = 0; i < 9; i++) {
+        var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
+        cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+      }
+      if (time_surface == ANIM_SURFACE_TIME) {
+      	anim = ANIM_NO_ANIM;
+      	update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
+      }
+ 	  break;
+  }
 
   // draw all cubes
   for (var i = 0; i < NumCubes; i++) {
@@ -378,8 +431,6 @@ function render() {
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
     ctm = mult(ctm, translate(translate_cubes[i]));
-    //ctm = mult(ctm, scale(scale_cube));
-    //ctm = mult(ctm, rotate(deg, [0, 1, 0]));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
