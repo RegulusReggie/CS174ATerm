@@ -153,6 +153,15 @@ const ANIM_SURFACE_TIME = 10;
 var time_surface = ANIM_SURFACE_TIME;
 var omega_rotate = 10;
 
+var texCoord = [
+    vec2(0, 0),
+    vec2(0, 1),
+    vec2(1, 1),
+    vec2(1, 0)
+];
+var texCoordsArray = [];
+var image;
+
 window.onload = function init(){
 
   //  Setup WebGL
@@ -222,11 +231,17 @@ function Cube(vertices, points) {
 
 function Quad(vertices, points, v1, v2, v3, v4) {
   points.push(vertices[v1]);
+  texCoordsArray.push(texCoord[0]);
   points.push(vertices[v3]);
+  texCoordsArray.push(texCoord[1]);
   points.push(vertices[v4]);
+  texCoordsArray.push(texCoord[2]);
   points.push(vertices[v1]);
+  texCoordsArray.push(texCoord[0]);
   points.push(vertices[v4]);
+  texCoordsArray.push(texCoord[2]);
   points.push(vertices[v2]);
+  texCoordsArray.push(texCoord[3]);
 }
 
 var corner = [
@@ -379,6 +394,18 @@ function rotate_point(theta, point) {
   return ctm;
 }
 
+function configureTexture( image ) {
+    texture = gl.createTexture();
+    gl.bindTexture( gl.TEXTURE_2D, texture );
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    
+    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
+         gl.RGB, gl.UNSIGNED_BYTE, image );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+    gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+}
+
 function render() {
 
   // Cubes self motion parameters
@@ -408,6 +435,10 @@ function render() {
   // draw all cubes
   for (var i = 0; i < NumCubes; i++) {
 
+    image = new Image();
+    image.src = image.src = "../Images/white_black.png";
+    configureTexture( image );
+
     // color cubes
     var colors = [];
     for (var j = 0; j < 6; j++) {
@@ -425,6 +456,14 @@ function render() {
     gl.enableVertexAttribArray(vColor);
 
     var scale_cube = vec3(scale_factor, scale_factor, scale_factor);
+
+    var tBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW );
+    
+    var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
+    gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vTexCoord );
     
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
