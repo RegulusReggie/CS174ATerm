@@ -17,6 +17,17 @@ var time=0;
 const NumCubes = 27;
 const NumCubeVertices = 36;
 
+
+var lightPosition = vec4(-0.0, 0.0, 0.0, 1.0 );
+var lightAmbient = vec4(0.0, 0.0, 0.0, 0.0 );
+var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var lightSpecular = vec4( 1.0, 1.0, 1.0, 0.0 );
+
+var materialAmbient = vec4( 0.1, 0.1, 0.1, 1.0 );
+var materialDiffuse = vec4( 0.2, 0.2, 0.2, 1.0 );
+var materialSpecular = vec4( 0.2, 0.2, 0.9, 0.0 );
+var materialShininess = 50.0;
+
 // Global
 var canvas;
 var gl;
@@ -424,7 +435,7 @@ const SURFACE_COLORS = [
         vec4(0.0, 0.0, 1.0, 1.0),  // blue
         vec4(0.0, 1.0, 0.0, 1.0),  // green
         vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        vec4(1.0, 0.5, 0.0, 1.0),  // orange
+        vec4(1.0, 0.05, 0.95, 1.0),  // orange
         vec4(0.6, 0.6, 0.6, 1.0)  // grey
 ];
 
@@ -537,6 +548,21 @@ window.onload = function init(){
   modelViewMatrix = gl.getUniformLocation(program, "modelViewMatrix");
   viewMatrix = initial_position;
   projectionMatrix = perspective(fovy, aspect, 1, 10000);
+
+    ambientProduct = mult(lightAmbient, materialAmbient);
+    diffuseProduct = mult(lightDiffuse, materialDiffuse);
+    specularProduct = mult(lightSpecular, materialSpecular);
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
+       flatten(ambientProduct));
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
+       flatten(diffuseProduct) );
+    gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"), 
+       flatten(specularProduct) );  
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), 
+       flatten(lightPosition) );
+       
+    gl.uniform1f(gl.getUniformLocation(program, 
+       "shininess"),materialShininess);
 
   var image = new Image();
     image.onload = function() { 
@@ -865,6 +891,7 @@ function render() {
 
 
   }
+
 
   // draw all cubes
   for (var i = 0; i < NumCubes; i++) {
