@@ -163,26 +163,26 @@ function explode(){
       mtplr[i]=-mtplr[i];
   }
   
-  randomShift[0]+=shiftUnit*0.7*mtplr[0];
+  randomShift[0]+=shiftUnit*0.73*mtplr[0];
   randomShift[1]+=shiftUnit*0.56*mtplr[1];
   if(!reUnite)
     randomShift[2]+=shiftUnit*0.16*mtplr[2];
   else
-    randomShift[2]+=shiftUnit*0.66*mtplr[2];
+    randomShift[2]+=shiftUnit*0.64*mtplr[2];
   if(!reUnite)
     randomShift[3]+=shiftUnit*0.20*mtplr[3];
   else
-    randomShift[3]+=shiftUnit*0.56*mtplr[3];
+    randomShift[3]+=shiftUnit*0.69*mtplr[3];
   if(!reUnite)
     randomShift[4]+=shiftUnit*0.47*mtplr[4];
   else
     randomShift[4]+=shiftUnit*0.77*mtplr[4];
-  randomShift[5]+=shiftUnit*0.89*mtplr[5];
+  randomShift[5]+=shiftUnit*0.86*mtplr[5];
   if(!reUnite)
     randomShift[6]+=shiftUnit*0.24*mtplr[6];
   else
     randomShift[6]+=shiftUnit*0.74*mtplr[6];
-  randomShift[7]+=shiftUnit*0.84*mtplr[7];
+  randomShift[7]+=shiftUnit*0.82*mtplr[7];
 
    translate_cubes = [
         vec3(-1-randomShift[0], 1+randomShift[0], 1+randomShift[0]),
@@ -678,6 +678,7 @@ function render() {
           }
           else
           {
+            mtplr=[-1,-1,-1,-1,-1,-1,-1,-1];
             reUnite=true;
             anim = ANIM_NO_ANIM;
           }
