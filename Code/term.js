@@ -3,6 +3,7 @@ var smtplr=1;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
 var reUnite=false;
+var tremble=false;
 
 var rotHis = [];
 var clkHis = [];
@@ -77,6 +78,42 @@ var deg = 0;
 var scale_speed = 0.01;
 var scale_factor = 3;
 var translate_cubes;
+var scale_cubes;
+
+function initCubeScals(){
+  scale_cubes = [
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1),
+        vec3(1, 1, 1)
+   ];
+ }
+
 
 function initCubeTrans(){
   translate_cubes = [
@@ -113,6 +150,7 @@ function initCubeTrans(){
  }
 
 initCubeTrans();
+initCubeScals();
 
 function explode(){
   shiftUnit=time*0.03;
@@ -149,6 +187,37 @@ function explode(){
         vec3(0, -1, -1),
         vec3(1+shift, -1-shift, -1-shift)
    ];
+    scale_cubes = [
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+            vec3(1, 1, 1),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3)
+       ];
  }
 
 
@@ -226,6 +295,39 @@ function explode(){
         vec3(0, -1, -1),
         vec3(1+randomShift[6], -1-randomShift[6], -1-randomShift[6])
    ];
+
+    scale_cubes = [
+            vec3(1+randomShift[0]*0.7, 1+randomShift[0]*0.7, 1+randomShift[0]*0.7),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[1]*0.7, 1+randomShift[1]*0.7, 1+randomShift[1]*0.7),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[2]*0.7, 1+randomShift[2]*0.7, 1+randomShift[2]*0.7),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[3]*0.7, 1+randomShift[3]*0.7, 1+randomShift[3]*0.7),
+
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+
+            vec3(1+randomShift[4]*0.7, 1+randomShift[4]*0.7, 1+randomShift[4]*0.7),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[7]*0.7, 1+randomShift[7]*0.7, 1+randomShift[7]*0.7),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[5]*0.7, 1+randomShift[5]*0.7, 1+randomShift[5]*0.7),
+            vec3(1, 1, 1),
+            vec3(1+randomShift[6]*0.7, 1+randomShift[6]*0.7, 1+randomShift[6]*0.7)
+       ];
+
   
   if(reUnite)
    {
@@ -276,6 +378,40 @@ function explode(){
         vec3(0, -1-shift, -1-shift),
         vec3(1+shift, -1-shift, -1-shift)
    ];
+
+   if(tremble)
+       scale_cubes = [
+            vec3(1+shift*0.1, 1+shift*0.5, 1+shift*0.2),
+            vec3(1+shift*0.05, 1+shift*0.74, 1+shift*0.3),
+            vec3(1+shift*0.3, 1+shift*0.67, 1+shift*0.35),
+            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.4),
+            vec3(1+shift*0.46, 1+shift*0.3, 1+shift*0.3),
+            vec3(1+shift*Math.random(), 1+shift*0.24, 1+shift*0.3),
+            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
+            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
+            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*0.8, 1+shift*0.3, 1+shift*Math.random()),
+            vec3(1+shift*0.2, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*0.1, 1+shift*0.3, 1+shift*0.3),
+
+            vec3(1+shift*0.26, 1+shift*Math.random(), 1+shift*0.84),
+            vec3(1+shift*0.57, 1+shift*Math.random(), 1+shift*0.73),
+            vec3(1+shift*0.55, 1+shift*0.15, 1+shift*Math.random()),
+            vec3(1+shift*0.36, 1+shift*0.7, 1+shift*0.3),
+            vec3(1+shift*0.5, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*0.4, 1+shift*Math.random(), 1+shift*0.3),
+            vec3(1+shift*Math.random(), 1+shift*Math.random(), 1+shift*0.6),
+            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.54),
+            vec3(1+shift*0.12, 1+shift*0.63, 1+shift*Math.random())
+       ];
+
  }
 
 // Cubes color
@@ -489,6 +625,13 @@ window.addEventListener("keydown", function() {
         expall=-1;
         exp=-1;
         initCubeTrans();
+        initCubeScals();
+        break;
+      case 52: // '4' key
+        if(tremble)
+          tremble=false;
+        else
+          tremble=true;
         break;
     }
     /*
@@ -746,7 +889,13 @@ function render() {
     var scale_cube = vec3(scale_factor, scale_factor, scale_factor);
     
     TexCoordArray();
-
+    if(expall==1||exp==1)
+    {
+      var temp=Math.random();
+      viewMatrix = mult(viewMatrix, rotate(1*temp*0.03, [0, 0, 1]));
+      viewMatrix = mult(viewMatrix, rotate(0.7*temp*0.03, [-1, 0, 0]));
+      viewMatrix = mult(viewMatrix, rotate(1.3*temp*0.03, [0, 1, 0]));
+    }
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
     ctm = mult(ctm, viewMatrix); 
@@ -755,7 +904,7 @@ function render() {
     if(exp==1)explode();
     if(expall==1)explodeAll();
     ctm = mult(ctm, translate(translate_cubes[i]));
-    //ctm=mult(ctm, scale(0.6,0.6,0.6));
+    ctm=mult(ctm, scale(scale_cubes[i]));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
