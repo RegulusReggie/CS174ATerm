@@ -6,37 +6,35 @@
 <script type="text/javascript" src="term.js"></script>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
-
 attribute vec4 vPosition;
 attribute vec4 vColor;
+attribute vec2 vTexCoord;
 varying vec4 fColor;
+varying vec2 fTexCoord;
 uniform mat4 modelViewMatrix;
-
 void
 main()
 {
     fColor = vColor;
+    fTexCoord = vTexCoord;
     gl_Position = modelViewMatrix * vPosition;
 }
-
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
-
 precision mediump float;
 varying vec4 fColor;
-
+varying vec2 fTexCoord;
+uniform sampler2D texture;
 void
 main()
 {
-    gl_FragColor = fColor;
+    gl_FragColor = fColor * texture2D( texture, fTexCoord);
 }
 </script>
 
 
 <script type="text/javascript">
-
-
 </script>
 
 <body>
