@@ -221,7 +221,7 @@ window.onload = function init(){
        configureTexture( image );
     }
   
-  image.src = "white_black.png";
+  image.src = "../Image/white_black.png";
 
   var image = document.getElementById("texImage");
  
