@@ -1,3 +1,5 @@
+var shift=0;
+var shiftUnit=0.02;
 
 const NumCubes = 27;
 const NumCubeVertices = 36;
@@ -94,6 +96,73 @@ var translate_cubes = [
         vec3(0, -1, -1),
         vec3(1, -1, -1)
    ];
+function explode(){
+   translate_cubes = [
+        vec3(-1-shift, 1+shift, 1+shift),
+        vec3(0, 1, 1),
+        vec3(1+shift, 1+shift, 1+shift),
+        vec3(-1, 1, 0),
+        vec3(0, 1, 0),
+        vec3(1, 1, 0),
+        vec3(-1-shift, 1+shift, -1-shift),
+        vec3(0, 1, -1),
+        vec3(1+shift, 1+shift, -1-shift),
+
+        vec3(-1, 0, 1),
+        vec3(0, 0, 1),
+        vec3(1, 0, 1),
+        vec3(-1, 0, 0),
+        vec3(0, 0, 0),
+        vec3(1, 0, 0),
+        vec3(-1, 0, -1),
+        vec3(0, 0, -1),
+        vec3(1, 0, -1),
+
+        vec3(-1-shift, -1-shift, 1+shift),
+        vec3(0, -1, 1),
+        vec3(1+shift, -1-shift, 1+shift),
+        vec3(-1, -1, 0),
+        vec3(0, -1, 0),
+        vec3(1, -1, 0),
+        vec3(-1-shift, -1-shift, -1-shift),
+        vec3(0, -1, -1),
+        vec3(1+shift, -1-shift, -1-shift)
+   ];
+ }
+
+ function explodeAll(){
+   translate_cubes = [
+        vec3(-1-shift, 1+shift, 1+shift),
+        vec3(0, 1+shift, 1+shift),
+        vec3(1+shift, 1+shift, 1+shift),
+        vec3(-1-shift, 1+shift, 0),
+        vec3(0, 1+shift, 0),
+        vec3(1+shift, 1+shift, 0),
+        vec3(-1-shift, 1+shift, -1-shift),
+        vec3(0, 1+shift, -1-shift),
+        vec3(1+shift, 1+shift, -1-shift),
+
+        vec3(-1-shift, 0, 1+shift),
+        vec3(0, 0, 1+shift),
+        vec3(1+shift, 0, 1+shift),
+        vec3(-1-shift, 0, 0),
+        vec3(0, 0, 0),
+        vec3(1+shift, 0, 0),
+        vec3(-1-shift, 0, -1-shift),
+        vec3(0, 0, -1-shift),
+        vec3(1+shift, 0, -1-shift),
+
+        vec3(-1-shift, -1-shift, 1+shift),
+        vec3(0, -1-shift, 1+shift),
+        vec3(1+shift, -1-shift, 1+shift),
+        vec3(-1-shift, -1-shift, 0),
+        vec3(0, -1-shift, 0),
+        vec3(1+shift, -1-shift, 0),
+        vec3(-1-shift, -1-shift, -1-shift),
+        vec3(0, -1-shift, -1-shift),
+        vec3(1+shift, -1-shift, -1-shift)
+   ];
+ }
 
 // Cubes color
 const SURFACE_COLORS = [
@@ -380,6 +449,8 @@ function rotate_point(theta, point) {
 }
 
 function render() {
+  shift+=shiftUnit;
+  if(shift>=1||shift<=0)shiftUnit=-shiftUnit;
 
   // Cubes self motion parameters
   scale_factor += scale_speed;
@@ -430,6 +501,8 @@ function render() {
     ctm = mult(ctm, projectionMatrix);
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
+    explode();
+    explodeAll();
     ctm = mult(ctm, translate(translate_cubes[i]));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
