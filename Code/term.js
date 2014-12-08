@@ -216,6 +216,17 @@ window.onload = function init(){
   viewMatrix = initial_position;
   projectionMatrix = perspective(fovy, aspect, 1, 10000);
 
+  var image = new Image();
+    image.onload = function() { 
+       configureTexture( image );
+    }
+  
+  image.src = "white_black.png";
+
+  var image = document.getElementById("texImage");
+ 
+  configureTexture( image );
+
   render();
 };
 
@@ -398,12 +409,24 @@ function configureTexture( image ) {
     texture = gl.createTexture();
     gl.bindTexture( gl.TEXTURE_2D, texture );
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    
+
     gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
          gl.RGB, gl.UNSIGNED_BYTE, image );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+    gl.generateMipmap( gl.TEXTURE_2D );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+}
+
+function TexCoordArray() {
+    var tBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW );
+    
+    var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
+    gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vTexCoord );
 }
 
 function render() {
@@ -434,10 +457,10 @@ function render() {
 
   // draw all cubes
   for (var i = 0; i < NumCubes; i++) {
-
-    image = new Image();
-    image.src = image.src = "../Images/white_black.png";
-    configureTexture( image );
+    
+    // var image = new Image();
+    // image.src = "white_black.png"; 
+    // configureTexture( image );
 
     // color cubes
     var colors = [];
@@ -456,15 +479,9 @@ function render() {
     gl.enableVertexAttribArray(vColor);
 
     var scale_cube = vec3(scale_factor, scale_factor, scale_factor);
+    
+    TexCoordArray();
 
-    var tBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW );
-    
-    var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
-    gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vTexCoord );
-    
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
     ctm = mult(ctm, viewMatrix); 
