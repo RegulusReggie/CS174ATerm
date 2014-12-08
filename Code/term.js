@@ -1,23 +1,16 @@
-var shift=0;
-var smtplr=1;
-var randomShift=[0,0,0,0,0,0,0,0];
-var mtplr=[1,1,1,1,1,1,1,1];
-var reUnite=false;
-var tremble=false;
-
-var rotHis = [];
-var clkHis = [];
-var HisSub=0;
-
-var resetMode=0,exp=-1,expall=-1;
-
-var timer = new Timer();
-var time=0;
-
+//utilities
 const NumCubes = 27;
 const NumCubeVertices = 36;
 
+var reUnite=false,tremble=false;
+var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0;;
+var randomShift=[0,0,0,0,0,0,0,0];
+var mtplr=[1,1,1,1,1,1,1,1];
+var rotHis = [];
+var clkHis = [];
+var timer = new Timer();
 
+//lighting
 var lightPosition = vec4(-0.0, 0.0, 0.0, 1.0 );
 var lightAmbient = vec4(0.0, 0.0, 0.0, 0.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -123,8 +116,7 @@ function initCubeScals(){
         vec3(1, 1, 1),
         vec3(1, 1, 1)
    ];
- }
-
+}
 
 function initCubeTrans(){
   translate_cubes = [
@@ -158,94 +150,85 @@ function initCubeTrans(){
         vec3(0, -1, -1),
         vec3(1, -1, -1)
    ];
- }
-
-initCubeTrans();
-initCubeScals();
+}
 
 function explode(){
   shiftUnit=time*0.03;
-    if(shift>1||shift<0)smtplr=-smtplr;
-    shift+=shiftUnit*smtplr;
-   translate_cubes = [
-        vec3(-1-shift, 1+shift, 1+shift),
-        vec3(0, 1, 1),
-        vec3(1+shift, 1+shift, 1+shift),
-        vec3(-1, 1, 0),
-        vec3(0, 1, 0),
-        vec3(1, 1, 0),
-        vec3(-1-shift, 1+shift, -1-shift),
-        vec3(0, 1, -1),
-        vec3(1+shift, 1+shift, -1-shift),
+  if(shift>1||shift<0)smtplr=-smtplr;
+  shift+=shiftUnit*smtplr;
+  translate_cubes = [
+      vec3(-1-shift, 1+shift, 1+shift),
+      vec3(0, 1, 1),
+      vec3(1+shift, 1+shift, 1+shift),
+      vec3(-1, 1, 0),
+      vec3(0, 1, 0),
+      vec3(1, 1, 0),
+      vec3(-1-shift, 1+shift, -1-shift),
+      vec3(0, 1, -1),
+      vec3(1+shift, 1+shift, -1-shift),
 
-        vec3(-1, 0, 1),
-        vec3(0, 0, 1),
-        vec3(1, 0, 1),
-        vec3(-1, 0, 0),
-        vec3(0, 0, 0),
-        vec3(1, 0, 0),
-        vec3(-1, 0, -1),
-        vec3(0, 0, -1),
-        vec3(1, 0, -1),
+      vec3(-1, 0, 1),
+      vec3(0, 0, 1),
+      vec3(1, 0, 1),
+      vec3(-1, 0, 0),
+      vec3(0, 0, 0),
+      vec3(1, 0, 0),
+      vec3(-1, 0, -1),
+      vec3(0, 0, -1),
+      vec3(1, 0, -1),
 
-        vec3(-1-shift, -1-shift, 1+shift),
-        vec3(0, -1, 1),
-        vec3(1+shift, -1-shift, 1+shift),
-        vec3(-1, -1, 0),
-        vec3(0, -1, 0),
-        vec3(1, -1, 0),
-        vec3(-1-shift, -1-shift, -1-shift),
-        vec3(0, -1, -1),
-        vec3(1+shift, -1-shift, -1-shift)
-   ];
-    scale_cubes = [
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(-1-shift, -1-shift, 1+shift),
+      vec3(0, -1, 1),
+      vec3(1+shift, -1-shift, 1+shift),
+      vec3(-1, -1, 0),
+      vec3(0, -1, 0),
+      vec3(1, -1, 0),
+      vec3(-1-shift, -1-shift, -1-shift),
+      vec3(0, -1, -1),
+      vec3(1+shift, -1-shift, -1-shift)
+  ];
+  scale_cubes = [
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
 
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
 
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
-            vec3(1, 1, 1),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3)
-       ];
- }
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+      vec3(1, 1, 1),
+      vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3)
+     ];
+}
 
-
- function explodeWhenReset(){
+function explodeWhenReset(){
   shiftUnit=Math.random()*0.1;
-
-  for(var i=0;i<8;i++)
-  {
-    if(randomShift[i]<=0)
-      {
-        if(reUnite)
-        {
+  for(var i=0;i<8;i++){
+    if(randomShift[i]<=0){
+        if(reUnite){
           randomShift[i]=0;
           mtplr[i]=0;
         }
-        else
-        {
+        else{
           randomShift[i]=-randomShift[i];
           mtplr[i]=-mtplr[i];
         }
@@ -278,155 +261,191 @@ function explode(){
     randomShift[6]+=shiftUnit*0.74*mtplr[6];
   randomShift[7]+=shiftUnit*0.82*mtplr[7];
 
-   translate_cubes = [
-        vec3(-1-randomShift[0], 1+randomShift[0], 1+randomShift[0]),
-        vec3(0, 1, 1),
-        vec3(1+randomShift[1], 1+randomShift[1], 1+randomShift[1]),
-        vec3(-1, 1, 0),
-        vec3(0, 1, 0),
-        vec3(1, 1, 0),
-        vec3(-1-randomShift[2], 1+randomShift[2], -1-randomShift[2]),
-        vec3(0, 1, -1),
-        vec3(1+randomShift[3], 1+randomShift[3], -1-randomShift[3]),
+  translate_cubes = [
+      vec3(-1-randomShift[0], 1+randomShift[0], 1+randomShift[0]),
+      vec3(0, 1, 1),
+      vec3(1+randomShift[1], 1+randomShift[1], 1+randomShift[1]),
+      vec3(-1, 1, 0),
+      vec3(0, 1, 0),
+      vec3(1, 1, 0),
+      vec3(-1-randomShift[2], 1+randomShift[2], -1-randomShift[2]),
+      vec3(0, 1, -1),
+      vec3(1+randomShift[3], 1+randomShift[3], -1-randomShift[3]),
 
-        vec3(-1, 0, 1),
-        vec3(0, 0, 1),
-        vec3(1, 0, 1),
-        vec3(-1, 0, 0),
-        vec3(0, 0, 0),
-        vec3(1, 0, 0),
-        vec3(-1, 0, -1),
-        vec3(0, 0, -1),
-        vec3(1, 0, -1),
+      vec3(-1, 0, 1),
+      vec3(0, 0, 1),
+      vec3(1, 0, 1),
+      vec3(-1, 0, 0),
+      vec3(0, 0, 0),
+      vec3(1, 0, 0),
+      vec3(-1, 0, -1),
+      vec3(0, 0, -1),
+      vec3(1, 0, -1),
 
-        vec3(-1-randomShift[4], -1-randomShift[4], 1+randomShift[4]),
-        vec3(0, -1, 1),
-        vec3(1+randomShift[7], -1-randomShift[7], 1+randomShift[7]),
-        vec3(-1, -1, 0),
-        vec3(0, -1, 0),
-        vec3(1, -1, 0),
-        vec3(-1-randomShift[5], -1-randomShift[5], -1-randomShift[5]),
-        vec3(0, -1, -1),
-        vec3(1+randomShift[6], -1-randomShift[6], -1-randomShift[6])
-   ];
+      vec3(-1-randomShift[4], -1-randomShift[4], 1+randomShift[4]),
+      vec3(0, -1, 1),
+      vec3(1+randomShift[7], -1-randomShift[7], 1+randomShift[7]),
+      vec3(-1, -1, 0),
+      vec3(0, -1, 0),
+      vec3(1, -1, 0),
+      vec3(-1-randomShift[5], -1-randomShift[5], -1-randomShift[5]),
+      vec3(0, -1, -1),
+      vec3(1+randomShift[6], -1-randomShift[6], -1-randomShift[6])
+ ];
 
-    scale_cubes = [
-            vec3(1+randomShift[0]*0.7, 1+randomShift[0]*0.7, 1+randomShift[0]*0.7),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[1]*0.7, 1+randomShift[1]*0.7, 1+randomShift[1]*0.7),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[2]*0.7, 1+randomShift[2]*0.7, 1+randomShift[2]*0.7),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[3]*0.7, 1+randomShift[3]*0.7, 1+randomShift[3]*0.7),
+  scale_cubes = [
+      vec3(1+randomShift[0]*0.7, 1+randomShift[0]*0.7, 1+randomShift[0]*0.7),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[1]*0.7, 1+randomShift[1]*0.7, 1+randomShift[1]*0.7),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[2]*0.7, 1+randomShift[2]*0.7, 1+randomShift[2]*0.7),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[3]*0.7, 1+randomShift[3]*0.7, 1+randomShift[3]*0.7),
 
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
 
-            vec3(1+randomShift[4]*0.7, 1+randomShift[4]*0.7, 1+randomShift[4]*0.7),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[7]*0.7, 1+randomShift[7]*0.7, 1+randomShift[7]*0.7),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[5]*0.7, 1+randomShift[5]*0.7, 1+randomShift[5]*0.7),
-            vec3(1, 1, 1),
-            vec3(1+randomShift[6]*0.7, 1+randomShift[6]*0.7, 1+randomShift[6]*0.7)
-       ];
+      vec3(1+randomShift[4]*0.7, 1+randomShift[4]*0.7, 1+randomShift[4]*0.7),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[7]*0.7, 1+randomShift[7]*0.7, 1+randomShift[7]*0.7),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[5]*0.7, 1+randomShift[5]*0.7, 1+randomShift[5]*0.7),
+      vec3(1, 1, 1),
+      vec3(1+randomShift[6]*0.7, 1+randomShift[6]*0.7, 1+randomShift[6]*0.7)
+  ];
 
-  
-  if(reUnite)
-   {
+  if(reUnite){
      var doneOrNot=true; 
      for(var i=0;i<8;i++)
         if(randomShift[i]!=0)doneOrNot=false;
-     if(doneOrNot)
-     {
-      reUnite=false;
-      resetMode=0;
-      mtplr=[1,1,1,1,1,1,1,1];
+     if(doneOrNot){
+        adder=0;
+        resetMode=0;
+        reUnite=false;
+        ANIM_SURFACE_TIME=10;
+        mtplr=[1,1,1,1,1,1,1,1];
      }
-   }
- }
+  }
+}
 
- function explodeAll(){
+function guichu(){
   shiftUnit=time*0.03;
-    if(shift>1||shift<0)smtplr=-smtplr;
+  if(shift>1||shift<0)smtplr=-smtplr;
     shift+=shiftUnit*smtplr;
+
+  if(tremble){
     translate_cubes = [
-        vec3(-1-shift, 1+shift, 1+shift),
-        vec3(0, 1+shift, 1+shift),
-        vec3(1+shift, 1+shift, 1+shift),
-        vec3(-1-shift, 1+shift, 0),
-        vec3(0, 1+shift, 0),
-        vec3(1+shift, 1+shift, 0),
-        vec3(-1-shift, 1+shift, -1-shift),
-        vec3(0, 1+shift, -1-shift),
-        vec3(1+shift, 1+shift, -1-shift),
+        vec3(-1.1, 1.1, 1.1),
+        vec3(0, 1.1, 1.1),
+        vec3(1.1, 1.1, 1.1),
+        vec3(-1.1, 1.1, 0),
+        vec3(0, 1.1, 0),
+        vec3(1.1, 1.1, 0),
+        vec3(-1.1, 1.1, -1.1),
+        vec3(0, 1.1, -1.1),
+        vec3(1.1, 1.1, -1.1),
 
-        vec3(-1-shift, 0, 1+shift),
-        vec3(0, 0, 1+shift),
-        vec3(1+shift, 0, 1+shift),
-        vec3(-1-shift, 0, 0),
+        vec3(-1.1, 0, 1.1),
+        vec3(0, 0, 1.1),
+        vec3(1.1, 0, 1.1),
+        vec3(-1.1, 0, 0),
         vec3(0, 0, 0),
-        vec3(1+shift, 0, 0),
-        vec3(-1-shift, 0, -1-shift),
-        vec3(0, 0, -1-shift),
-        vec3(1+shift, 0, -1-shift),
+        vec3(1.1, 0, 0),
+        vec3(-1.1, 0, -1.1),
+        vec3(0, 0, -1.1),
+        vec3(1.1, 0, -1.1),
 
-        vec3(-1-shift, -1-shift, 1+shift),
-        vec3(0, -1-shift, 1+shift),
-        vec3(1+shift, -1-shift, 1+shift),
-        vec3(-1-shift, -1-shift, 0),
-        vec3(0, -1-shift, 0),
-        vec3(1+shift, -1-shift, 0),
-        vec3(-1-shift, -1-shift, -1-shift),
-        vec3(0, -1-shift, -1-shift),
-        vec3(1+shift, -1-shift, -1-shift)
+        vec3(-1.1, -1.1, 1.1),
+        vec3(0, -1.1, 1.1),
+        vec3(1.1, -1.1, 1.1),
+        vec3(-1.1, -1.1, 0),
+        vec3(0, -1.1, 0),
+        vec3(1.1, -1.1, 0),
+        vec3(-1.1, -1.1, -1.1),
+        vec3(0, -1.1, -1.1),
+        vec3(1.1, -1.1, -1.1)
    ];
+    scale_cubes = [
+        vec3(1+shift*0.1, 1+shift*0.5, 1+shift*0.2),
+        vec3(1+shift*0.05, 1+shift*0.74, 1+shift*Math.random()),
+        vec3(1+shift*0.3, 1+shift*0.67, 1+shift*0.35),
+        vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.4),
+        vec3(1+shift*0.46, 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*0.24, 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
 
-   if(tremble)
-       scale_cubes = [
-            vec3(1+shift*0.1, 1+shift*0.5, 1+shift*0.2),
-            vec3(1+shift*0.05, 1+shift*0.74, 1+shift*0.3),
-            vec3(1+shift*0.3, 1+shift*0.67, 1+shift*0.35),
-            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.4),
-            vec3(1+shift*0.46, 1+shift*0.3, 1+shift*0.3),
-            vec3(1+shift*Math.random(), 1+shift*0.24, 1+shift*0.3),
-            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
+        vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
+        vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*0.8, 1+shift*0.3, 1+shift*Math.random()),
+        vec3(1+shift*0.2, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
 
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
-            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*Math.random()),
-            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*Math.random(), 1+shift*0.3, 1+shift*0.3),
-            vec3(1+shift*0.3, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*0.8, 1+shift*0.3, 1+shift*Math.random()),
-            vec3(1+shift*0.2, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*0.1, 1+shift*0.3, 1+shift*0.3),
+        vec3(1+shift*0.26, 1+shift*Math.random(), 1+shift*0.84),
+        vec3(1+shift*0.57, 1+shift*Math.random(), 1+shift*0.73),
+        vec3(1+shift*0.55, 1+shift*0.15, 1+shift*Math.random()),
+        vec3(1+shift*Math.random(), 1+shift*0.7, 1+shift*0.3),
+        vec3(1+shift*0.5, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*0.4, 1+shift*Math.random(), 1+shift*0.3),
+        vec3(1+shift*Math.random(), 1+shift*Math.random(), 1+shift*0.6),
+        vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.54),
+        vec3(1+shift*0.12, 1+shift*0.63, 1+shift*Math.random())
+    ];
+  }
+}
 
-            vec3(1+shift*0.26, 1+shift*Math.random(), 1+shift*0.84),
-            vec3(1+shift*0.57, 1+shift*Math.random(), 1+shift*0.73),
-            vec3(1+shift*0.55, 1+shift*0.15, 1+shift*Math.random()),
-            vec3(1+shift*0.36, 1+shift*0.7, 1+shift*0.3),
-            vec3(1+shift*0.5, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*0.4, 1+shift*Math.random(), 1+shift*0.3),
-            vec3(1+shift*Math.random(), 1+shift*Math.random(), 1+shift*0.6),
-            vec3(1+shift*0.3, 1+shift*0.3, 1+shift*0.54),
-            vec3(1+shift*0.12, 1+shift*0.63, 1+shift*Math.random())
-       ];
+function explodeAll(){
+  shiftUnit=time*0.03;
+  if(shift>1||shift<0)smtplr=-smtplr;
+  shift+=shiftUnit*smtplr;
+  translate_cubes = [
+      vec3(-1-shift, 1+shift, 1+shift),
+      vec3(0, 1+shift, 1+shift),
+      vec3(1+shift, 1+shift, 1+shift),
+      vec3(-1-shift, 1+shift, 0),
+      vec3(0, 1+shift, 0),
+      vec3(1+shift, 1+shift, 0),
+      vec3(-1-shift, 1+shift, -1-shift),
+      vec3(0, 1+shift, -1-shift),
+      vec3(1+shift, 1+shift, -1-shift),
 
- }
+      vec3(-1-shift, 0, 1+shift),
+      vec3(0, 0, 1+shift),
+      vec3(1+shift, 0, 1+shift),
+      vec3(-1-shift, 0, 0),
+      vec3(0, 0, 0),
+      vec3(1+shift, 0, 0),
+      vec3(-1-shift, 0, -1-shift),
+      vec3(0, 0, -1-shift),
+      vec3(1+shift, 0, -1-shift),
+
+      vec3(-1-shift, -1-shift, 1+shift),
+      vec3(0, -1-shift, 1+shift),
+      vec3(1+shift, -1-shift, 1+shift),
+      vec3(-1-shift, -1-shift, 0),
+      vec3(0, -1-shift, 0),
+      vec3(1+shift, -1-shift, 0),
+      vec3(-1-shift, -1-shift, -1-shift),
+      vec3(0, -1-shift, -1-shift),
+      vec3(1+shift, -1-shift, -1-shift)
+ ];
+}
 
 // Cubes color
 const SURFACE_COLORS = [
@@ -482,7 +501,7 @@ var anim_surface_clockwise;
 var anim_rotate_axis;
 var anim = ANIM_NO_ANIM;
 
-const ANIM_SURFACE_TIME = 10;
+var ANIM_SURFACE_TIME = 10;
 var time_surface = ANIM_SURFACE_TIME;
 var omega_rotate = 10;
 
@@ -508,8 +527,10 @@ window.onload = function init(){
   //  Configure WebGL
   gl.clearColor( 0.8, 0.8, 0.8, 1.0 );    //background: grey
   gl.enable(gl.DEPTH_TEST);
-    
+
   // Set up cubes
+  initCubeTrans();
+  initCubeScals();
   vertices = [
     vec3(  length,   length,  length ), //vertex 1
     vec3(  length,  -length,  length ), //vertex 2
@@ -560,9 +581,8 @@ window.onload = function init(){
        flatten(specularProduct) );  
     gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), 
        flatten(lightPosition) );
-       
-    gl.uniform1f(gl.getUniformLocation(program, 
-       "shininess"),materialShininess);
+    gl.uniform1f(gl.getUniformLocation(program, "shininess"),
+       materialShininess);
 
   var image = new Image();
     image.onload = function() { 
@@ -570,10 +590,9 @@ window.onload = function init(){
     }
   
   image.src = "white_black_new.jpg";
-
   var image = document.getElementById("texImage");
- 
   configureTexture( image );
+
   timer.reset(); 
   render();
 };
@@ -632,8 +651,6 @@ function update_cube_positions(surface, clockwise) {
 
 /*--------------keyboard event------------------*/
 window.addEventListener("keydown", function() {
-
-  
   if(!resetMode)
   {
     if (anim != ANIM_NO_ANIM) return;
@@ -655,6 +672,7 @@ window.addEventListener("keydown", function() {
         exp=-1;
         initCubeTrans();
         initCubeScals();
+        tremble=false;
         break;
       case 52: // '4' key
         if(tremble)
@@ -662,6 +680,7 @@ window.addEventListener("keydown", function() {
         else
           tremble=true;
         break;
+
     }
     /*
       Press
@@ -700,7 +719,7 @@ window.addEventListener("keydown", function() {
         rotHis.push(BACK);
         
       break;
-      case 77:
+      case 77:   // 'm' key
       case 109:
         if(rotHis.length>0)
         {
@@ -783,6 +802,17 @@ window.addEventListener("keydown", function() {
       case 67:
         anim = ANIM_ROTATE;
       break;
+    }
+  }
+  else
+  {
+    switch (event.keyCode) {
+      case 48:
+        if(ANIM_SURFACE_TIME>3)adder=-2;
+        break;
+      case 57:
+        if(ANIM_SURFACE_TIME<20)adder=2;
+        break;
     }
   }
 });
@@ -874,10 +904,12 @@ function render() {
           clkHis.pop();
           if(rotHis.length!=0)
           {
+            ANIM_SURFACE_TIME+=adder;
             anim_surface=rotHis[rotHis.length-1];
             anim_surface_clockwise=clkHis[clkHis.length-1];
             time_surface = 0;
             anim = ANIM_SURFACE;
+            adder=0;
           }
           else
           {
@@ -887,9 +919,6 @@ function render() {
           }
         }
       }
-
-
-
   }
 
 
@@ -931,10 +960,11 @@ function render() {
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
     
+    guichu();
     if(exp==1)explode();
     if(expall==1)explodeAll();
     ctm = mult(ctm, translate(translate_cubes[i]));
-    ctm=mult(ctm, scale(scale_cubes[i]));
+    ctm = mult(ctm, scale(scale_cubes[i]));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
