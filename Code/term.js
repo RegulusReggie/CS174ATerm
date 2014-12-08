@@ -1,5 +1,5 @@
 var shift=0;
-var shiftUnit=0.001;
+var smtplr=1;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
 var reUnite=false;
@@ -8,8 +8,10 @@ var rotHis = [];
 var clkHis = [];
 var HisSub=0;
 
-var resetMode=0;
+var resetMode=0,exp=-1,expall=-1;
 
+var timer = new Timer();
+var time=0;
 
 const NumCubes = 27;
 const NumCubeVertices = 36;
@@ -74,8 +76,10 @@ var cube_positions = [];
 var deg = 0;
 var scale_speed = 0.01;
 var scale_factor = 3;
+var translate_cubes;
 
-var translate_cubes = [
+function initCubeTrans(){
+  translate_cubes = [
         vec3(-1, 1, 1),
         vec3(0, 1, 1),
         vec3(1, 1, 1),
@@ -106,10 +110,14 @@ var translate_cubes = [
         vec3(0, -1, -1),
         vec3(1, -1, -1)
    ];
+ }
+
+initCubeTrans();
 
 function explode(){
-    shift+=shiftUnit;
-  if(shift>=1||shift<=0)shiftUnit=-shiftUnit;
+  shiftUnit=time*0.03;
+    if(shift>1||shift<0)smtplr=-smtplr;
+    shift+=shiftUnit*smtplr;
    translate_cubes = [
         vec3(-1-shift, 1+shift, 1+shift),
         vec3(0, 1, 1),
@@ -159,16 +167,19 @@ function explode(){
         else
           mtplr[i]=-mtplr[i];
       }
-    if(randomShift[i]>=1)
+    if(!reUnite && randomShift[i]>=1)
       mtplr[i]=-mtplr[i];
   }
   
   randomShift[0]+=shiftUnit*0.73*mtplr[0];
-  randomShift[1]+=shiftUnit*0.56*mtplr[1];
+  if(!reUnite)
+    randomShift[1]+=shiftUnit*0.56*mtplr[1];
+  else
+    randomShift[1]+=shiftUnit*0.90*mtplr[1];
   if(!reUnite)
     randomShift[2]+=shiftUnit*0.16*mtplr[2];
   else
-    randomShift[2]+=shiftUnit*0.64*mtplr[2];
+    randomShift[2]+=shiftUnit*0.74*mtplr[2];
   if(!reUnite)
     randomShift[3]+=shiftUnit*0.20*mtplr[3];
   else
@@ -231,9 +242,9 @@ function explode(){
  }
 
  function explodeAll(){
-
-    if(shift>1||shift<0)shiftUnit=-shiftUnit;
-    shift+=shiftUnit;
+  shiftUnit=time*0.03;
+    if(shift>1||shift<0)smtplr=-smtplr;
+    shift+=shiftUnit*smtplr;
     translate_cubes = [
         vec3(-1-shift, 1+shift, 1+shift),
         vec3(0, 1+shift, 1+shift),
@@ -398,7 +409,7 @@ window.onload = function init(){
   var image = document.getElementById("texImage");
  
   configureTexture( image );
-
+  timer.reset(); 
   render();
 };
 
@@ -465,6 +476,21 @@ window.addEventListener("keydown", function() {
     anim_surface = 6;
     anim_surface_clockwise = 0;
     anim = ANIM_NO_ANIM;
+    // switch for type of explosion
+    switch (event.keyCode) {
+      case 49:  //'1' key
+        exp=-exp;
+        break;
+      case 50:  //'2' key
+        expall=-expall;
+        break;
+      case 51:  //'3' key
+        shift=0;
+        expall=-1;
+        exp=-1;
+        initCubeTrans();
+        break;
+    }
     /*
       Press
         't' to rotate top
@@ -504,11 +530,18 @@ window.addEventListener("keydown", function() {
       break;
       case 77:
       case 109:
-        anim_surface=rotHis[rotHis.length-1];
-        anim_surface_clockwise=clkHis[clkHis.length-1];
-        time_surface = 0;
-        anim = ANIM_SURFACE;
-        resetMode=1;
+        if(rotHis.length>0)
+        {
+          shift=0;
+          shiftUnit=0.001;
+          exp=-1;
+          expall=-1;
+          anim_surface=rotHis[rotHis.length-1];
+          anim_surface_clockwise=clkHis[clkHis.length-1];
+          time_surface = 0;
+          anim = ANIM_SURFACE;
+          resetMode=1;
+        }
       break;
     }
     // switch for surface rotation clockwise
@@ -550,10 +583,10 @@ window.addEventListener("keydown", function() {
     switch (event.keyCode) {
       // reset
       case 80:
-        for (var i = 0; i < NumCubes; i++) {
-          cube_positions[i] = i;
-          cube_matrices[i] = mat4();
-        }
+        // for (var i = 0; i < NumCubes; i++) {
+        //   cube_positions[i] = i;
+        //   cube_matrices[i] = mat4();
+        // }
         viewMatrix = initial_position;
       break;
       // rotate surface
@@ -569,8 +602,6 @@ window.addEventListener("keydown", function() {
       case 70:
       case 71:
       case 72:
-      case 77:
-      case 109:
         time_surface = 0;
         anim = ANIM_SURFACE;
       break;
@@ -623,7 +654,7 @@ function TexCoordArray() {
 
 function render() {
 
-
+  time = timer.getElapsedTime() / 1000;
   // Cubes self motion parameters
   scale_factor += scale_speed;
   if (scale_factor <= SCALE_MIN || scale_factor >= SCALE_MAX) scale_speed = -scale_speed;
@@ -653,10 +684,10 @@ function render() {
   else
   {
     explodeWhenReset();
-    //explode();
-    viewMatrix = mult(viewMatrix, rotate(1, [0, 0, 1]));
-    viewMatrix = mult(viewMatrix, rotate(0.7, [1, 0, 0]));
-    viewMatrix = mult(viewMatrix, rotate(1.3, [0, 1, 0]));
+    var temp=Math.random();
+    viewMatrix = mult(viewMatrix, rotate(1*temp, [0, 0, 1]));
+    viewMatrix = mult(viewMatrix, rotate(0.7*temp, [1, 0, 0]));
+    viewMatrix = mult(viewMatrix, rotate(1.3*temp, [0, 1, 0]));
     if(anim!=ANIM_NO_ANIM)
     {
       time_surface++;
@@ -721,12 +752,12 @@ function render() {
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
     
-    //explode();
+    if(exp==1)explode();
+    if(expall==1)explodeAll();
     ctm = mult(ctm, translate(translate_cubes[i]));
     //ctm=mult(ctm, scale(0.6,0.6,0.6));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
-
     window.requestAnimFrame(render);
 }
