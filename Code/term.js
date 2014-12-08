@@ -234,7 +234,10 @@ function explode(){
           mtplr[i]=0;
         }
         else
+        {
+          randomShift[i]=-randomShift[i];
           mtplr[i]=-mtplr[i];
+        }
       }
     if(!reUnite && randomShift[i]>=1)
       mtplr[i]=-mtplr[i];
@@ -540,7 +543,7 @@ window.onload = function init(){
        configureTexture( image );
     }
   
-  image.src = "white_black.png";
+  image.src = "white_black_new.jpg";
 
   var image = document.getElementById("texImage");
  
