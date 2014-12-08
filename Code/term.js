@@ -1,5 +1,15 @@
 var shift=0;
-var shiftUnit=0.02;
+var shiftUnit=0.001;
+var randomShift=[0,0,0,0,0,0,0,0];
+var mtplr=[1,1,1,1,1,1,1,1];
+var reUnite=false;
+
+var rotHis = [];
+var clkHis = [];
+var HisSub=0;
+
+var resetMode=0;
+
 
 const NumCubes = 27;
 const NumCubeVertices = 36;
@@ -96,7 +106,10 @@ var translate_cubes = [
         vec3(0, -1, -1),
         vec3(1, -1, -1)
    ];
+
 function explode(){
+    shift+=shiftUnit;
+  if(shift>=1||shift<=0)shiftUnit=-shiftUnit;
    translate_cubes = [
         vec3(-1-shift, 1+shift, 1+shift),
         vec3(0, 1, 1),
@@ -130,8 +143,98 @@ function explode(){
    ];
  }
 
- function explodeAll(){
+
+ function explodeWhenReset(){
+  shiftUnit=Math.random()*0.1;
+
+  for(var i=0;i<8;i++)
+  {
+    if(randomShift[i]<=0)
+      {
+        if(reUnite)
+        {
+          randomShift[i]=0;
+          mtplr[i]=0;
+        }
+        else
+          mtplr[i]=-mtplr[i];
+      }
+    if(randomShift[i]>=1)
+      mtplr[i]=-mtplr[i];
+  }
+  
+  randomShift[0]+=shiftUnit*0.7*mtplr[0];
+  randomShift[1]+=shiftUnit*0.56*mtplr[1];
+  if(!reUnite)
+    randomShift[2]+=shiftUnit*0.16*mtplr[2];
+  else
+    randomShift[2]+=shiftUnit*0.66*mtplr[2];
+  if(!reUnite)
+    randomShift[3]+=shiftUnit*0.20*mtplr[3];
+  else
+    randomShift[3]+=shiftUnit*0.56*mtplr[3];
+  if(!reUnite)
+    randomShift[4]+=shiftUnit*0.47*mtplr[4];
+  else
+    randomShift[4]+=shiftUnit*0.77*mtplr[4];
+  randomShift[5]+=shiftUnit*0.89*mtplr[5];
+  if(!reUnite)
+    randomShift[6]+=shiftUnit*0.24*mtplr[6];
+  else
+    randomShift[6]+=shiftUnit*0.74*mtplr[6];
+  randomShift[7]+=shiftUnit*0.84*mtplr[7];
+
    translate_cubes = [
+        vec3(-1-randomShift[0], 1+randomShift[0], 1+randomShift[0]),
+        vec3(0, 1, 1),
+        vec3(1+randomShift[1], 1+randomShift[1], 1+randomShift[1]),
+        vec3(-1, 1, 0),
+        vec3(0, 1, 0),
+        vec3(1, 1, 0),
+        vec3(-1-randomShift[2], 1+randomShift[2], -1-randomShift[2]),
+        vec3(0, 1, -1),
+        vec3(1+randomShift[3], 1+randomShift[3], -1-randomShift[3]),
+
+        vec3(-1, 0, 1),
+        vec3(0, 0, 1),
+        vec3(1, 0, 1),
+        vec3(-1, 0, 0),
+        vec3(0, 0, 0),
+        vec3(1, 0, 0),
+        vec3(-1, 0, -1),
+        vec3(0, 0, -1),
+        vec3(1, 0, -1),
+
+        vec3(-1-randomShift[4], -1-randomShift[4], 1+randomShift[4]),
+        vec3(0, -1, 1),
+        vec3(1+randomShift[7], -1-randomShift[7], 1+randomShift[7]),
+        vec3(-1, -1, 0),
+        vec3(0, -1, 0),
+        vec3(1, -1, 0),
+        vec3(-1-randomShift[5], -1-randomShift[5], -1-randomShift[5]),
+        vec3(0, -1, -1),
+        vec3(1+randomShift[6], -1-randomShift[6], -1-randomShift[6])
+   ];
+  
+  if(reUnite)
+   {
+     var doneOrNot=true; 
+     for(var i=0;i<8;i++)
+        if(randomShift[i]!=0)doneOrNot=false;
+     if(doneOrNot)
+     {
+      reUnite=false;
+      resetMode=0;
+      mtplr=[1,1,1,1,1,1,1,1];
+     }
+   }
+ }
+
+ function explodeAll(){
+
+    if(shift>1||shift<0)shiftUnit=-shiftUnit;
+    shift+=shiftUnit;
+    translate_cubes = [
         vec3(-1-shift, 1+shift, 1+shift),
         vec3(0, 1+shift, 1+shift),
         vec3(1+shift, 1+shift, 1+shift),
@@ -328,110 +431,130 @@ function update_cube_positions(surface, clockwise) {
 /*--------------keyboard event------------------*/
 window.addEventListener("keydown", function() {
 
-  if (anim != ANIM_NO_ANIM) return;
+  
+  if(!resetMode)
+  {
+    if (anim != ANIM_NO_ANIM) return;
+    var toColor;
+    anim_surface = 6;
+    anim_surface_clockwise = 0;
+    anim = ANIM_NO_ANIM;
+    /*
+      Press
+        't' to rotate top
+    */
+    // switch for surface of rotation
+    switch (event.keyCode) {
+      case 81:
+      case 65:
+        anim_surface = TOP;
+        rotHis.push(TOP);
+      break;
+      case 87:
+      case 83:
+        anim_surface = BOTTOM;
+        rotHis.push(BOTTOM);
+      break;
+      case 69:
+      case 68:
+        anim_surface = LEFT;
+        rotHis.push(LEFT);
+      break;
+      case 82:
+      case 70:
+        anim_surface = RIGHT;
+        rotHis.push(RIGHT);
+      break;
+      case 84:
+      case 71:
+        anim_surface = FRONT;
+        rotHis.push(FRONT);
+      break;
+      case 89:
+      case 72:
+        anim_surface = BACK;
+        rotHis.push(BACK);
+        
+      break;
+      case 77:
+      case 109:
+        anim_surface=rotHis[rotHis.length-1];
+        anim_surface_clockwise=clkHis[clkHis.length-1];
+        time_surface = 0;
+        anim = ANIM_SURFACE;
+        resetMode=1;
+      break;
+    }
+    // switch for surface rotation clockwise
+    switch (event.keyCode) {
+      case 81:
+      case 87:
+      case 69:
+      case 82:
+      case 84:
+      case 89:
+        anim_surface_clockwise = 1;
+        clkHis.push(-1);
+      break;
+      case 65:
+      case 83:
+      case 68:
+      case 70:
+      case 71:
+      case 72:
+        anim_surface_clockwise = -1;
+        clkHis.push(1);
+      break;
+    }
 
-  var toColor;
-  var displacement_x = 0;
-  var displacement_z = 0;
-  anim_surface = 6;
-  anim_surface_clockwise = 0;
-  anim = ANIM_NO_ANIM;
-  /*
-    Press
-      't' to rotate top
-  */
-  // switch for surface of rotation
-  switch (event.keyCode) {
-    case 81:
-    case 65:
-      anim_surface = TOP;
-    break;
-    case 87:
-    case 83:
-      anim_surface = BOTTOM;
-    break;
-    case 69:
-    case 68:
-      anim_surface = LEFT;
-    break;
-    case 82:
-    case 70:
-      anim_surface = RIGHT;
-    break;
-    case 84:
-    case 71:
-      anim_surface = FRONT;
-    break;
-    case 89:
-    case 72:
-      anim_surface = BACK;
-    break;
-  }
-  // switch for surface rotation clockwise
-  switch (event.keyCode) {
-    case 81:
-    case 87:
-    case 69:
-    case 82:
-    case 84:
-    case 89:
-      anim_surface_clockwise = 1;
-    break;
-    case 65:
-    case 83:
-    case 68:
-    case 70:
-    case 71:
-    case 72:
-      anim_surface_clockwise = -1;
-    break;
-  }
+    // switch for rotation axis
+    switch (event.keyCode) {
+      case 90:
+        anim_rotate_axis = [0, 0, 1];
+        break;
+      case 88:
+        anim_rotate_axis = [1, 0, 0];
+        break;
+      case 67:
+        anim_rotate_axis = [0, 1, 0];
+        break;
+    }
 
-  // switch for rotation axis
-  switch (event.keyCode) {
-  	case 90:
-  	  anim_rotate_axis = [0, 0, 1];
-  	  break;
-  	case 88:
-  	  anim_rotate_axis = [1, 0, 0];
-  	  break;
-  	case 67:
-  	  anim_rotate_axis = [0, 1, 0];
-  	  break;
-  }
-
-  // switch for type of action
-  switch (event.keyCode) {
-  	// reset
-    case 80:
-      for (var i = 0; i < NumCubes; i++) {
-        cube_positions[i] = i;
-        cube_matrices[i] = mat4();
-      }
-      viewMatrix = initial_position;
-    break;
-    // rotate surface
-    case 81:
-    case 87:
-    case 69:
-    case 82:
-    case 84:
-    case 89:
-    case 65:
-    case 83:
-    case 68:
-    case 70:
-    case 71:
-    case 72:
-      time_surface = 0;
-      anim = ANIM_SURFACE;
-    break;
-    // rotate cube
-    case 90:
-    case 88:
-    case 67:
-      anim = ANIM_ROTATE;
-    break;
+    // switch for type of action
+    switch (event.keyCode) {
+      // reset
+      case 80:
+        for (var i = 0; i < NumCubes; i++) {
+          cube_positions[i] = i;
+          cube_matrices[i] = mat4();
+        }
+        viewMatrix = initial_position;
+      break;
+      // rotate surface
+      case 81:
+      case 87:
+      case 69:
+      case 82:
+      case 84:
+      case 89:
+      case 65:
+      case 83:
+      case 68:
+      case 70:
+      case 71:
+      case 72:
+      case 77:
+      case 109:
+        time_surface = 0;
+        anim = ANIM_SURFACE;
+      break;
+      // rotate cube
+      case 90:
+      case 88:
+      case 67:
+        anim = ANIM_ROTATE;
+      break;
+    }
   }
 });
 
@@ -449,8 +572,7 @@ function rotate_point(theta, point) {
 }
 
 function render() {
-  shift+=shiftUnit;
-  if(shift>=1||shift<=0)shiftUnit=-shiftUnit;
+
 
   // Cubes self motion parameters
   scale_factor += scale_speed;
@@ -458,22 +580,62 @@ function render() {
 
   gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  switch (anim) {
-  	case ANIM_ROTATE:
-  	  viewMatrix = mult(viewMatrix, rotate(omega_rotate, anim_rotate_axis));
-  	  anim = ANIM_NO_ANIM;
-  	  break;
-  	case ANIM_SURFACE:
-  	  time_surface++;
- 	  for (var i = 0; i < 9; i++) {
-        var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
-        cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+  if(resetMode==0)
+  {
+    switch (anim) {
+      case ANIM_ROTATE:
+        viewMatrix = mult(viewMatrix, rotate(omega_rotate, anim_rotate_axis));
+        anim = ANIM_NO_ANIM;
+        break;
+      case ANIM_SURFACE:
+        time_surface++;
+      for (var i = 0; i < 9; i++) {
+          var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
+          cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+        }
+        if (time_surface == ANIM_SURFACE_TIME) {
+          anim = ANIM_NO_ANIM;
+          update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
+        }
+      break;
+    }
+  }
+  else
+  {
+    explodeWhenReset();
+    //explode();
+    viewMatrix = mult(viewMatrix, rotate(1, [0, 0, 1]));
+    viewMatrix = mult(viewMatrix, rotate(0.7, [1, 0, 0]));
+    viewMatrix = mult(viewMatrix, rotate(1.3, [0, 1, 0]));
+    if(anim!=ANIM_NO_ANIM)
+    {
+      time_surface++;
+      for (var i = 0; i < 9; i++) {
+          var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
+          cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+        }
+        if (time_surface == ANIM_SURFACE_TIME) {
+          anim = ANIM_NO_ANIM;
+          update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
+          rotHis.pop();
+          clkHis.pop();
+          if(rotHis.length!=0)
+          {
+            anim_surface=rotHis[rotHis.length-1];
+            anim_surface_clockwise=clkHis[clkHis.length-1];
+            time_surface = 0;
+            anim = ANIM_SURFACE;
+          }
+          else
+          {
+            reUnite=true;
+            anim = ANIM_NO_ANIM;
+          }
+        }
       }
-      if (time_surface == ANIM_SURFACE_TIME) {
-      	anim = ANIM_NO_ANIM;
-      	update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
-      }
- 	  break;
+
+
+
   }
 
   // draw all cubes
@@ -501,9 +663,10 @@ function render() {
     ctm = mult(ctm, projectionMatrix);
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
-    explode();
-    explodeAll();
+    
+    //explode();
     ctm = mult(ctm, translate(translate_cubes[i]));
+    //ctm=mult(ctm, scale(0.6,0.6,0.6));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
