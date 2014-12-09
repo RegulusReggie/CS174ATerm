@@ -3,13 +3,17 @@ const NumCubes = 27;
 const NumCubeVertices = 36;
 
 var reUnite=false,tremble=false;
-var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0;;
+var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,time2=0,time3=0,newOrReset=0,speedControl=0,jumpMode=0;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
-var rotHis = [];
-var clkHis = [];
+var rotHis = [], clkHis = [], setRot = [], setClk = [];
+var hisLength;
 var timer = new Timer();
+var timer2 = new Timer();
+var timer3 = new Timer();
+var vInit=4,t=0,gravity=5,vCuur,jump=0,jt=0;
 
+//lighting
 //lighting
 var useBlend = false;
 var lightAmbient = vec3(0.2, 0.2, 0.2);
@@ -18,14 +22,13 @@ var lightFrom = vec3(-0.25, -0.25, -1);
 var directionalColor = vec3(0.8, 0.8, 0.8);
 var adjustedLD = negate(normalize(lightFrom));
 
+
 // Global
 var canvas;
 var gl;
 var projectionMatrix;
 var viewMatrix;
 var modelViewMatrix;
-var normalMatrix;
-
 var program;
 
 // camera attributes
@@ -38,7 +41,7 @@ var cameraX = 0;
 var cameraY = 0;
 var cameraZ = 25;
 var angle = 270;
-var fovy = 45;
+var fovy = 30;
 var aspect;
 
 // Cubes attributes
@@ -82,6 +85,22 @@ var scale_speed = 0.01;
 var scale_factor = 3;
 var translate_cubes;
 var scale_cubes;
+
+function generateNew() {
+  var step=Math.floor(Math.random()*15+10);
+  for(var i=0;i<step;i++)
+  {
+    var tempRot=Math.floor(Math.random()*6);
+    var tempClk=Math.floor(Math.random()*2);
+    if(tempClk==0)tempClk=-1;
+    setRot.push(tempRot);
+    setClk.push(tempClk);
+    rotHis.splice(hisLength,0,tempRot);
+    clkHis.splice(hisLength,0,-tempClk);
+    //rotHis.push(tempRot);
+    //clkHis.push(-tempClk);
+  }
+}
 
 function initCubeScals(){
   scale_cubes = [
@@ -152,7 +171,7 @@ function initCubeTrans(){
 }
 
 function explode(){
-  shiftUnit=time*0.03;
+  shiftUnit=time2*0.03;
   if(shift>1||shift<0)smtplr=-smtplr;
   shift+=shiftUnit*smtplr;
   translate_cubes = [
@@ -332,6 +351,7 @@ function explodeWhenReset(){
         adder=0;
         resetMode=0;
         reUnite=false;
+        speedControl=0;
         ANIM_SURFACE_TIME=10;
         mtplr=[1,1,1,1,1,1,1,1];
      }
@@ -410,7 +430,7 @@ function guichu(){
 }
 
 function explodeAll(){
-  shiftUnit=time*0.03;
+  shiftUnit=time3*0.03;
   if(shift>1||shift<0)smtplr=-smtplr;
   shift+=shiftUnit*smtplr;
   translate_cubes = [
@@ -444,6 +464,51 @@ function explodeAll(){
       vec3(0, -1-shift, -1-shift),
       vec3(1+shift, -1-shift, -1-shift)
  ];
+}
+
+function doReset(rotArr,clkArr){
+  explodeWhenReset();
+  var tempMult=Math.floor(rotArr.length/10);
+  if(newOrReset==-1&&speedControl==0)
+  {
+    ANIM_SURFACE_TIME=10-tempMult*2;
+    if(ANIM_SURFACE_TIME<=3)ANIM_SURFACE_TIME=3;
+  }
+  var temp=Math.random()
+  viewMatrix = mult(viewMatrix, rotate(tempMult*temp, [0, 0, 1]));
+  temp=Math.random();
+  viewMatrix = mult(viewMatrix, rotate(1.2*temp, [1, 0, 0]));
+  temp=Math.random();
+  viewMatrix = mult(viewMatrix, rotate(1.8*temp*tempMult/2, [0, 1, 0]));
+  if(anim!=ANIM_NO_ANIM)
+  {
+    time_surface++;
+    for (var i = 0; i < 9; i++) {
+        var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
+        cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+      }
+      if (time_surface == ANIM_SURFACE_TIME) {
+        anim = ANIM_NO_ANIM;
+        update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
+        rotArr.pop();
+        clkArr.pop();
+        if(rotArr.length!=0)
+        {
+          ANIM_SURFACE_TIME+=adder;
+          anim_surface=rotArr[rotArr.length-1];
+          anim_surface_clockwise=clkArr[clkArr.length-1];
+          time_surface = 0;
+          anim = ANIM_SURFACE;
+          adder=0;
+        }
+        else
+        {
+          mtplr=[-1,-1,-1,-1,-1,-1,-1,-1];
+          reUnite=true;
+          anim = ANIM_NO_ANIM;
+        }
+      }
+    }
 }
 
 // Cubes color
@@ -524,7 +589,7 @@ window.onload = function init(){
   aspect = canvas.width / canvas.height;
     
   //  Configure WebGL
-  gl.clearColor( 0.0, 0.0, 0.0, 1.0 );    //background: black
+  gl.clearColor( 0.0, 0.0, 0.0, 1.0 );    //background: grey
 
   // Set up cubes
   initCubeTrans();
@@ -546,8 +611,8 @@ window.onload = function init(){
   }
 
   // points to draw cubes
-  points = [];
-  normals = [];
+  var points = [];
+  var normals = [];
   Cube(vertices, points, normals);
 
   //  Load shaders and initialize attribute buffers
@@ -576,23 +641,9 @@ window.onload = function init(){
 
   // initialize transformation matrices
   modelViewMatrix = gl.getUniformLocation(program, "modelViewMatrix");
-  normalMatrix = gl.getUniformLocation(program, "normalMatrix");
   viewMatrix = initial_position;
-  projectionMatrix = perspective(fovy, aspect, 0.1, 100);
+  projectionMatrix = perspective(fovy, aspect, 1, 10000);
 
-    // ambientProduct = mult(lightAmbient, materialAmbient);
-    // diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    // specularProduct = mult(lightSpecular, materialSpecular);
-    // gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-    //    flatten(ambientProduct));
-    // gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-    //    flatten(diffuseProduct) );
-    // gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"), 
-    //    flatten(specularProduct) );  
-    // gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"), 
-    //    flatten(lightPosition) );
-    // gl.uniform1f(gl.getUniformLocation(program, "shininess"),
-    //    materialShininess);
   gl.uniform3fv(gl.getUniformLocation(program, "directionalColor"),
     flatten(directionalColor));
   gl.uniform3fv(gl.getUniformLocation(program, "lightDirection"),
@@ -602,17 +653,17 @@ window.onload = function init(){
   gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false,
     flatten(projectionMatrix));
 
-
   var image = new Image();
     image.onload = function() { 
        configureTexture( image );
     }
   
-  image.src = "white_black_new.jpg";
   var image = document.getElementById("texImage");
   configureTexture( image );
 
   timer.reset(); 
+  timer2.reset();
+  timer3.reset();
   render();
 };
 
@@ -678,6 +729,12 @@ function update_cube_positions(surface, clockwise) {
 window.addEventListener("keydown", function() {
 
   if (event.keyCode == 66) useBlend = !useBlend;
+  switch (event.keyCode) {
+    case 74:  //'j' key
+    case 106:
+      jumpMode=1;
+    break;
+  }
   if(!resetMode)
   {
     if (anim != ANIM_NO_ANIM) return;
@@ -689,11 +746,22 @@ window.addEventListener("keydown", function() {
     switch (event.keyCode) {
       case 49:  //'1' key
         exp=-exp;
+        expall=-1;
+        tremble=false;
         break;
       case 50:  //'2' key
         expall=-expall;
+        exp=-1;
+        tremble=false;
+        initCubeScals();
         break;
-      case 51:  //'3' key
+      case 51: // '4' key
+        if(tremble)
+          tremble=false;
+        else
+          tremble=true;
+        break;
+      case 52:  //'3' key
         shift=0;
         expall=-1;
         exp=-1;
@@ -701,13 +769,6 @@ window.addEventListener("keydown", function() {
         initCubeScals();
         tremble=false;
         break;
-      case 52: // '4' key
-        if(tremble)
-          tremble=false;
-        else
-          tremble=true;
-        break;
-
     }
     /*
       Press
@@ -743,13 +804,13 @@ window.addEventListener("keydown", function() {
       case 89:
       case 72:
         anim_surface = BACK;
-        rotHis.push(BACK);
-        
+        rotHis.push(BACK); 
       break;
       case 77:   // 'm' key
       case 109:
         if(rotHis.length>0)
         {
+          newOrReset=-1;
           shift=0;
           shiftUnit=0.001;
           exp=-1;
@@ -760,6 +821,22 @@ window.addEventListener("keydown", function() {
           anim = ANIM_SURFACE;
           resetMode=1;
         }
+      break;
+      case 78:    //'n' key
+      case 110:
+        ANIM_SURFACE_TIME=1;
+        hisLength=rotHis.length;
+        newOrReset=1;
+        generateNew();
+        shift=0;
+        shiftUnit=0.001;
+        exp=-1;
+        expall=-1;
+        anim_surface=setRot[setRot.length-1];
+        anim_surface_clockwise=setClk[setClk.length-1];
+        time_surface = 0;
+        anim = ANIM_SURFACE;
+        resetMode=1;
       break;
     }
     // switch for surface rotation clockwise
@@ -835,9 +912,11 @@ window.addEventListener("keydown", function() {
   {
     switch (event.keyCode) {
       case 48:
+        speedControl=1;
         if(ANIM_SURFACE_TIME>3)adder=-2;
         break;
       case 57:
+        speedControl=1;
         if(ANIM_SURFACE_TIME<20)adder=2;
         break;
     }
@@ -862,9 +941,10 @@ function configureTexture( image ) {
     gl.bindTexture( gl.TEXTURE_2D, texture );
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
+         gl.RGB, gl.UNSIGNED_BYTE, image );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.generateMipmap( gl.TEXTURE_2D );
@@ -875,6 +955,7 @@ function TexCoordArray() {
     var tBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW );
+    
     var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
     gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vTexCoord );
@@ -886,7 +967,7 @@ function render() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
     gl.enable(gl.BLEND);
     gl.disable(gl.DEPTH_TEST);
-    gl.uniform1f(gl.getUniformLocation(program, "uAlpha"), 0.5);
+    gl.uniform1f(gl.getUniformLocation(program, "uAlpha"), 1.0);
   }
   else {
     gl.enable(gl.DEPTH_TEST);
@@ -895,6 +976,10 @@ function render() {
   }
 
   time = timer.getElapsedTime() / 1000;
+  if(exp==1)time2=timer2.getElapsedTime() / 1000;
+  else timer2.reset();
+  if(expall==1)time3=timer3.getElapsedTime() / 1000;
+  else timer3.reset();
   // Cubes self motion parameters
   scale_factor += scale_speed;
   if (scale_factor <= SCALE_MIN || scale_factor >= SCALE_MAX) scale_speed = -scale_speed;
@@ -903,6 +988,7 @@ function render() {
 
   if(resetMode==0)
   {
+    ANIM_SURFACE_TIME=10;
     switch (anim) {
       case ANIM_ROTATE:
         viewMatrix = mult(viewMatrix, rotate(omega_rotate, anim_rotate_axis));
@@ -923,45 +1009,19 @@ function render() {
   }
   else
   {
-    explodeWhenReset();
-    var temp=Math.random();
-    viewMatrix = mult(viewMatrix, rotate(1*temp, [0, 0, 1]));
-    viewMatrix = mult(viewMatrix, rotate(0.7*temp, [1, 0, 0]));
-    viewMatrix = mult(viewMatrix, rotate(1.3*temp, [0, 1, 0]));
-    if(anim!=ANIM_NO_ANIM)
-    {
-      time_surface++;
-      for (var i = 0; i < 9; i++) {
-          var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
-          cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
-        }
-        if (time_surface == ANIM_SURFACE_TIME) {
-          anim = ANIM_NO_ANIM;
-          update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
-          rotHis.pop();
-          clkHis.pop();
-          if(rotHis.length!=0)
-          {
-            ANIM_SURFACE_TIME+=adder;
-            anim_surface=rotHis[rotHis.length-1];
-            anim_surface_clockwise=clkHis[clkHis.length-1];
-            time_surface = 0;
-            anim = ANIM_SURFACE;
-            adder=0;
-          }
-          else
-          {
-            mtplr=[-1,-1,-1,-1,-1,-1,-1,-1];
-            reUnite=true;
-            anim = ANIM_NO_ANIM;
-          }
-        }
-      }
+    if(newOrReset==-1)
+      doReset(rotHis,clkHis);
+    if(newOrReset==1)
+      doReset(setRot,setClk);
   }
 
 
   // draw all cubes
   for (var i = 0; i < NumCubes; i++) {
+    
+    // var image = new Image();
+    // image.src = "white_black.png"; 
+    // configureTexture( image );
 
     // color cubes
     var colors = [];
@@ -974,12 +1034,14 @@ function render() {
     var cBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+
     var vColor = gl.getAttribLocation(program, "vColor");
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
 
     var scale_cube = vec3(scale_factor, scale_factor, scale_factor);
-
+    
+    TexCoordArray();
     if(expall==1||exp==1)
     {
       var temp=Math.random();
@@ -987,17 +1049,40 @@ function render() {
       viewMatrix = mult(viewMatrix, rotate(0.7*temp*0.03, [-1, 0, 0]));
       viewMatrix = mult(viewMatrix, rotate(1.3*temp*0.03, [0, 1, 0]));
     }
+
+  if(jumpMode==1)
+  {
+    t+=0.001;
+    jump=-(vInit*t-0.5*gravity*t*t);
+    vCurr=vInit-gravity*t+0.4;
+    if(jump>0)
+    {
+      jt++;
+      vInit=-vCurr;
+      t=0;
+    }
+    if(jt>20)
+    {
+      jumpMode=0;
+      jump=0;
+      t=0;
+      vCurr=0;
+      vInit=3;
+      jt=0;
+    }
+  }
+
     var ctm = mat4();
+    ctm=mult(ctm,translate(0,-jump,0));
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
     
     guichu();
-    if(exp==1) explode();
-    if(expall==1) explodeAll();
+    if(exp==1)explode();
+    if(expall==1)explodeAll();
     ctm = mult(ctm, translate(translate_cubes[i]));
     ctm = mult(ctm, scale(scale_cubes[i]));
     gl.uniformMatrix4fv(modelViewMatrix, false, flatten(ctm));
-
     gl.drawArrays(gl.TRIANGLES, 0, NumCubeVertices);
   }
     window.requestAnimFrame(render);
