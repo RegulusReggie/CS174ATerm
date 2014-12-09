@@ -3,12 +3,15 @@ const NumCubes = 27;
 const NumCubeVertices = 36;
 
 var reUnite=false,tremble=false;
-var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,newOrReset=0,speedControl=0;
+var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,time2=0,time3=0,newOrReset=0,speedControl=0,jumpMode=0;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
 var rotHis = [], clkHis = [], setRot = [], setClk = [];
 var hisLength;
 var timer = new Timer();
+var timer2 = new Timer();
+var timer3 = new Timer();
+var vInit=4,t=0,gravity=5,vCuur,jump=0,jt=0;
 
 //lighting
 var lightPosition = vec4(0.0, 0.0, 0.0, 1.0 );
@@ -713,6 +716,12 @@ function update_cube_positions(surface, clockwise) {
 
 /*--------------keyboard event------------------*/
 window.addEventListener("keydown", function() {
+  switch (event.keyCode) {
+    case 74:  //'j' key
+    case 106:
+      jumpMode=1;
+    break;
+  }
   if(!resetMode)
   {
     if (anim != ANIM_NO_ANIM) return;
@@ -724,11 +733,27 @@ window.addEventListener("keydown", function() {
     switch (event.keyCode) {
       case 49:  //'1' key
         exp=-exp;
+        //shift=0;
+        expall=-1;
+        initCubeTrans();
+        initCubeScals();
+        tremble=false;
         break;
       case 50:  //'2' key
-        expall=-expall;
+        //shift=0;
+        expall=1;
+        exp=-1;
+        initCubeTrans();
+        initCubeScals();
+        tremble=false;
         break;
-      case 51:  //'3' key
+      case 51: // '4' key
+        if(tremble)
+          tremble=false;
+        else
+          tremble=true;
+        break;
+      case 52:  //'3' key
         shift=0;
         expall=-1;
         exp=-1;
@@ -736,13 +761,6 @@ window.addEventListener("keydown", function() {
         initCubeScals();
         tremble=false;
         break;
-      case 52: // '4' key
-        if(tremble)
-          tremble=false;
-        else
-          tremble=true;
-        break;
-
     }
     /*
       Press
@@ -1006,8 +1024,33 @@ function render() {
       viewMatrix = mult(viewMatrix, rotate(0.7*temp*0.03, [-1, 0, 0]));
       viewMatrix = mult(viewMatrix, rotate(1.3*temp*0.03, [0, 1, 0]));
     }
+
+  if(jumpMode==1)
+  {
+    t+=0.001;
+    jump=-(vInit*t-0.5*gravity*t*t);
+    vCurr=vInit-gravity*t+0.4;
+    if(jump>0)
+    {
+      jt++;
+      vInit=-vCurr;
+      t=0;
+    }
+    if(jt>20)
+    {
+      jumpMode=0;
+      jump=0;
+      t=0;
+      vCurr=0;
+      vInit=3;
+      jt=0;
+    }
+  }
+    
+
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
+    ctm=mult(ctm,translate(0,-jump,0));
     ctm = mult(ctm, viewMatrix); 
     ctm = mult(ctm, cube_matrices[i]);
     
