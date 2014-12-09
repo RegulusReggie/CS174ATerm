@@ -3,7 +3,7 @@ const NumCubes = 27;
 const NumCubeVertices = 36;
 
 var reUnite=false,tremble=false;
-var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,newOrReset=0;
+var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,newOrReset=0,speedControl=0;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
 var rotHis = [], clkHis = [], setRot = [], setClk = [];
@@ -349,6 +349,7 @@ function explodeWhenReset(){
         adder=0;
         resetMode=0;
         reUnite=false;
+        speedControl=0;
         ANIM_SURFACE_TIME=10;
         mtplr=[1,1,1,1,1,1,1,1];
      }
@@ -466,12 +467,17 @@ function explodeAll(){
 function doReset(rotArr,clkArr){
   explodeWhenReset();
   var tempMult=Math.floor(rotArr.length/10);
+  if(newOrReset==-1&&speedControl==0)
+  {
+    ANIM_SURFACE_TIME=10-tempMult*2;
+    if(ANIM_SURFACE_TIME<=3)ANIM_SURFACE_TIME=3;
+  }
   var temp=Math.random()
   viewMatrix = mult(viewMatrix, rotate(tempMult*temp, [0, 0, 1]));
   temp=Math.random();
-  viewMatrix = mult(viewMatrix, rotate(1.7*temp, [1, 0, 0]));
+  viewMatrix = mult(viewMatrix, rotate(1.2*temp, [1, 0, 0]));
   temp=Math.random();
-  viewMatrix = mult(viewMatrix, rotate(1.3*temp*tempMult/2, [0, 1, 0]));
+  viewMatrix = mult(viewMatrix, rotate(1.8*temp*tempMult/2, [0, 1, 0]));
   if(anim!=ANIM_NO_ANIM)
   {
     time_surface++;
@@ -880,9 +886,11 @@ window.addEventListener("keydown", function() {
   {
     switch (event.keyCode) {
       case 48:
+        speedControl=1;
         if(ANIM_SURFACE_TIME>3)adder=-2;
         break;
       case 57:
+        speedControl=1;
         if(ANIM_SURFACE_TIME<20)adder=2;
         break;
     }
