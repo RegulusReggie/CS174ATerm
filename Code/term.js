@@ -172,7 +172,7 @@ function initCubeTrans(){
 }
 
 function explode(){
-  shiftUnit=time*0.03;
+  shiftUnit=time2*0.03;
   if(shift>1||shift<0)smtplr=-smtplr;
   shift+=shiftUnit*smtplr;
   translate_cubes = [
@@ -659,6 +659,8 @@ window.onload = function init(){
   configureTexture( image );
 
   timer.reset(); 
+  timer2.reset();
+  timer3.reset();
   render();
 };
 
@@ -733,19 +735,14 @@ window.addEventListener("keydown", function() {
     switch (event.keyCode) {
       case 49:  //'1' key
         exp=-exp;
-        //shift=0;
         expall=-1;
-        initCubeTrans();
-        initCubeScals();
         tremble=false;
         break;
       case 50:  //'2' key
-        //shift=0;
-        expall=1;
+        expall=-expall;
         exp=-1;
-        initCubeTrans();
-        initCubeScals();
         tremble=false;
+        initCubeScals();
         break;
       case 51: // '4' key
         if(tremble)
@@ -955,6 +952,10 @@ function TexCoordArray() {
 function render() {
 
   time = timer.getElapsedTime() / 1000;
+  if(exp==1)time2=timer2.getElapsedTime() / 1000;
+  else timer2.reset();
+  if(expall==1)time3=timer3.getElapsedTime() / 1000;
+  else timer3.reset();
   // Cubes self motion parameters
   scale_factor += scale_speed;
   if (scale_factor <= SCALE_MIN || scale_factor >= SCALE_MAX) scale_speed = -scale_speed;
@@ -1046,8 +1047,7 @@ function render() {
       jt=0;
     }
   }
-    
-
+  
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
     ctm=mult(ctm,translate(0,-jump,0));
