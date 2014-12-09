@@ -3,15 +3,15 @@ const NumCubes = 27;
 const NumCubeVertices = 36;
 
 var reUnite=false,tremble=false;
-var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0;;
+var resetMode=0, exp=-1, expall=-1, adder=0, shift=0, smtplr=1, time=0,newOrReset=0;
 var randomShift=[0,0,0,0,0,0,0,0];
 var mtplr=[1,1,1,1,1,1,1,1];
-var rotHis = [];
-var clkHis = [];
+var rotHis = [], clkHis = [], setRot = [], setClk = [];
+var hisLength;
 var timer = new Timer();
 
 //lighting
-var lightPosition = vec4(-0.0, 0.0, 0.0, 1.0 );
+var lightPosition = vec4(0.0, 0.0, 0.0, 1.0 );
 var lightAmbient = vec4(0.0, 0.0, 0.0, 0.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 0.0 );
@@ -83,6 +83,22 @@ var scale_speed = 0.01;
 var scale_factor = 3;
 var translate_cubes;
 var scale_cubes;
+
+function generateNew() {
+  var step=Math.floor(Math.random()*15+10);
+  for(var i=0;i<step;i++)
+  {
+    var tempRot=Math.floor(Math.random()*6);
+    var tempClk=Math.floor(Math.random()*2);
+    if(tempClk==0)tempClk=-1;
+    setRot.push(tempRot);
+    setClk.push(tempClk);
+    rotHis.splice(hisLength,0,tempRot);
+    clkHis.splice(hisLength,0,-tempClk);
+    //rotHis.push(tempRot);
+    //clkHis.push(-tempClk);
+  }
+}
 
 function initCubeScals(){
   scale_cubes = [
@@ -447,6 +463,46 @@ function explodeAll(){
  ];
 }
 
+function doReset(rotArr,clkArr){
+  explodeWhenReset();
+  var tempMult=Math.floor(rotArr.length/10);
+  var temp=Math.random()
+  viewMatrix = mult(viewMatrix, rotate(tempMult*temp, [0, 0, 1]));
+  temp=Math.random();
+  viewMatrix = mult(viewMatrix, rotate(1.7*temp, [1, 0, 0]));
+  temp=Math.random();
+  viewMatrix = mult(viewMatrix, rotate(1.3*temp*tempMult/2, [0, 1, 0]));
+  if(anim!=ANIM_NO_ANIM)
+  {
+    time_surface++;
+    for (var i = 0; i < 9; i++) {
+        var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
+        cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
+      }
+      if (time_surface == ANIM_SURFACE_TIME) {
+        anim = ANIM_NO_ANIM;
+        update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
+        rotArr.pop();
+        clkArr.pop();
+        if(rotArr.length!=0)
+        {
+          ANIM_SURFACE_TIME+=adder;
+          anim_surface=rotArr[rotArr.length-1];
+          anim_surface_clockwise=clkArr[clkArr.length-1];
+          time_surface = 0;
+          anim = ANIM_SURFACE;
+          adder=0;
+        }
+        else
+        {
+          mtplr=[-1,-1,-1,-1,-1,-1,-1,-1];
+          reUnite=true;
+          anim = ANIM_NO_ANIM;
+        }
+      }
+    }
+}
+
 // Cubes color
 const SURFACE_COLORS = [
         vec4(1.0, 0.0, 0.0, 1.0),  // red
@@ -716,13 +772,13 @@ window.addEventListener("keydown", function() {
       case 89:
       case 72:
         anim_surface = BACK;
-        rotHis.push(BACK);
-        
+        rotHis.push(BACK); 
       break;
       case 77:   // 'm' key
       case 109:
         if(rotHis.length>0)
         {
+          newOrReset=-1;
           shift=0;
           shiftUnit=0.001;
           exp=-1;
@@ -733,6 +789,22 @@ window.addEventListener("keydown", function() {
           anim = ANIM_SURFACE;
           resetMode=1;
         }
+      break;
+      case 78:    //'n' key
+      case 110:
+        ANIM_SURFACE_TIME=1;
+        hisLength=rotHis.length;
+        newOrReset=1;
+        generateNew();
+        shift=0;
+        shiftUnit=0.001;
+        exp=-1;
+        expall=-1;
+        anim_surface=setRot[setRot.length-1];
+        anim_surface_clockwise=setClk[setClk.length-1];
+        time_surface = 0;
+        anim = ANIM_SURFACE;
+        resetMode=1;
       break;
     }
     // switch for surface rotation clockwise
@@ -865,6 +937,7 @@ function render() {
 
   if(resetMode==0)
   {
+    ANIM_SURFACE_TIME=10;
     switch (anim) {
       case ANIM_ROTATE:
         viewMatrix = mult(viewMatrix, rotate(omega_rotate, anim_rotate_axis));
@@ -885,40 +958,10 @@ function render() {
   }
   else
   {
-    explodeWhenReset();
-    var temp=Math.random();
-    viewMatrix = mult(viewMatrix, rotate(1*temp, [0, 0, 1]));
-    viewMatrix = mult(viewMatrix, rotate(0.7*temp, [1, 0, 0]));
-    viewMatrix = mult(viewMatrix, rotate(1.3*temp, [0, 1, 0]));
-    if(anim!=ANIM_NO_ANIM)
-    {
-      time_surface++;
-      for (var i = 0; i < 9; i++) {
-          var myPosition = cube_positions[rotation_rubiks[anim_surface][i]];
-          cube_matrices[myPosition] = mult(rotate(anim_surface_clockwise * (90 / ANIM_SURFACE_TIME), axes[anim_surface]), cube_matrices[myPosition]);
-        }
-        if (time_surface == ANIM_SURFACE_TIME) {
-          anim = ANIM_NO_ANIM;
-          update_cube_positions(anim_surface, anim_surface_clockwise > 0 ? 0 : 1);
-          rotHis.pop();
-          clkHis.pop();
-          if(rotHis.length!=0)
-          {
-            ANIM_SURFACE_TIME+=adder;
-            anim_surface=rotHis[rotHis.length-1];
-            anim_surface_clockwise=clkHis[clkHis.length-1];
-            time_surface = 0;
-            anim = ANIM_SURFACE;
-            adder=0;
-          }
-          else
-          {
-            mtplr=[-1,-1,-1,-1,-1,-1,-1,-1];
-            reUnite=true;
-            anim = ANIM_NO_ANIM;
-          }
-        }
-      }
+    if(newOrReset==-1)
+      doReset(rotHis,clkHis);
+    if(newOrReset==1)
+      doReset(setRot,setClk);
   }
 
 
