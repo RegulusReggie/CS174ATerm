@@ -431,7 +431,7 @@ function guichu(){
 }
 
 function explodeAll(){
-  shiftUnit=time*0.03;
+  shiftUnit=time3*0.03;
   if(shift>1||shift<0)smtplr=-smtplr;
   shift+=shiftUnit*smtplr;
   translate_cubes = [
@@ -1047,7 +1047,7 @@ function render() {
       jt=0;
     }
   }
-  
+
     var ctm = mat4();
     ctm = mult(ctm, projectionMatrix);
     ctm=mult(ctm,translate(0,-jump,0));
