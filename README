@@ -1,4 +1,60 @@
+/////////////////////////////////////////////////////////////////////
+CS 174a Term Project Team#14
+/////////////////////////////////////////////////////////////////////
+
+Team members & UID:
 Yichen Pan UID:604152505
 Pengcheng Pan UID:004138541
 Weijia Yu UID:204202814
 Weichen Huang UID: 804153047
+
+/////////////////////////////////////////////////////////////////////
+What we did ?
+/////////////////////////////////////////////////////////////////////
+We implemented a 3D Rubik Cube by WebGl with the functions below
+
+Key	Function
+1	Explode corner cubes
+2	Explode all cubes
+3	Reset the explode and shaking
+4	Shaking all cubes
+p	Reset
+m	Reset with explode
+q/a	Rotating upper level clockwise/counter-clockwise (Orignial position, looking from upside)
+w/s	Rotating lower level clockwise/counter-clockwise (Orignial position, looking from downside)
+d/e	Rotating left level clockwise/counter-clockwise (Orignial position, looking from leftside)
+f/r	Rotating right level clockwise/counter-clockwise (Orignial position, looking from rightside)
+z	Rotating cube around x-axis
+y	Rotating cube around y-axis
+c	Rotating cube around z-axis
+b	Make the rubik become transparent
+j	Jump
+n	Randomly disorder rubik
+
+/////////////////////////////////////////////////////////////////////
+How we implemented these functions & what techniques we used?
+/////////////////////////////////////////////////////////////////////
+
+Rubik Construction & Basic Operations ------ By Weichen
+By doing translation and rotation to the cube, including rotation of six faces and the rotation of the whole rubik. For rotations of the six faces, to make sure everytime the right small cubes are rotated, I assign each cube with an ID number, and relate each ID number to a position on the cube. After every operation, I will save the ID numbers in their related positions in an array to record where the small cubes are. For example, the top-left-forward corner has position array index 0, and it saves an ID number indicating which small cube it's there in order to draw the cubes. Each small cube has its own translation matrix to record their translation and after every operation I will update their tranlation matrices and the position array.
+
+Transparency (Press B) ------ By Weichen
+I used directional lighting and use blending to realize the transparency of cubes.
+
+The Outlines of cube ------ By Yichen
+Using Mipmap texture to texture a white image with black outlines onto each side of the cubes.
+
+Explode the rubik ------ By Pengcheng
+Pressing 1 will make its corners explode, and pressing 2 will make all the small cubes explode. This is done by a series of cube translation, camera rotation, and little bit scaling, too, since in mode 1 the corner cubes will get larger as they move further away.
+
+Shake the rubik(Press 3.) ------ By Pengcheng
+This is done by randomly scaling each cube a little bit.
+
+Reset with Explode(Press m.) ------ By Pengcheng
+During its reset process, it will keep randomly exploding its corners, and the camera will move as well. The closer the cube gets to the original state, the slower the process. In other words, if there's still a lot of steps to take, it will rotate relatively fast. Reset is implememted with a stack that keeps track of the earlier steps. Cube translation, scaling, camera rotation are all involved here.
+
+Randomly shuffle the cube(Press n) ------ By Pengcheng
+Visually it's very fast. Basically it's the same process as reset, only this time the rotation gets much faster (on purpose, since you don't want the user to remember the steps)
+
+Jump(Press j) ------ By Pengcheng
+At any time, pressing j key can make the cube jump. Eventually it will stop due to 'gravity', which is a constant I set in the code, much lower than 9.8 here. This is done by some view matrix translation combined with mathmatics calculation. 
